@@ -418,27 +418,52 @@ function rotateMatrix(matrix) {
  *  [-2, 9, 5, -3]  => [-3, -2, 5, 9]
  */
 
-function sortByAsc(/* arr */) {
-  // if (arr.length <= 1) {
-  //   return arr;
-  // }
-  // const pivotIndex = Math.floor(Math.random() * arr.length);
-  // const pivot = arr[pivotIndex];
-  // const left = [];
-  // const right = [];
+function sortByAsc(arr) {
+  function merge(left, right) {
+    const sorted = [];
+    let leftIndex = 0;
+    let rightIndex = 0;
+    while (leftIndex < left.length && rightIndex < right.length) {
+      if (left[leftIndex] <= right[rightIndex]) {
+        sorted[sorted.length] = left[leftIndex];
+        leftIndex += 1;
+      } else {
+        sorted[sorted.length] = right[rightIndex];
+        rightIndex += 1;
+      }
+    }
 
-  // for (let i = 1; i < arr.length; i += 1) {
-  //   if (arr[i] < pivot) {
-  //     left.push(arr[i]);
-  //   } else {
-  //     right.push(arr[i]);
-  //   }
-  // }
+    while (leftIndex < left.length) {
+      sorted[sorted.length] = left[leftIndex];
+      leftIndex += 1;
+    }
 
-  // const result = [...sortByAsc(left), pivot, ...sortByAsc(right)];
+    while (rightIndex < right.length) {
+      sorted[sorted.length] = right[rightIndex];
+      rightIndex += 1;
+    }
 
-  // return result;
-  throw new Error('Not implemented');
+    return sorted;
+  }
+
+  function mergeSort(array, start = 0, end = array.length - 1) {
+    if (start >= end) {
+      return [array[start]];
+    }
+
+    const mid = Math.floor((start + end) / 2);
+    const left = mergeSort(array, start, mid);
+    const right = mergeSort(array, mid + 1, end);
+
+    return merge(left, right);
+  }
+
+  const arrCopy = arr;
+  const result = mergeSort(arr);
+  for (let i = 0; i < result.length; i += 1) {
+    arrCopy[i] = result[i];
+  }
+  return arr;
 }
 
 /**
@@ -458,33 +483,31 @@ function sortByAsc(/* arr */) {
  *  '012345', 3 => '024135' => '043215' => '031425'
  *  'qwerty', 3 => 'qetwry' => 'qtrewy' => 'qrwtey'
  */
-function shuffleChar(/* str, iterations */) {
-  // if (iterations <= 0) {
-  //   return str;
-  // }
+function shuffleChar(str, iterations) {
+  if (iterations <= 0) {
+    return str;
+  }
 
-  // let charArray = [...str];
-  // let resultArray = new Array(charArray.length);
+  let result = str;
+  const cache = new Map();
 
-  // for (let iter = 0; iter < iterations; iter += 1) {
-  //   let evenIndex = 0;
-  //   let oddIndex = charArray.length / 2;
+  for (let iter = 0; iter < iterations; iter += 1) {
+    if (cache.has(result)) {
+      result = cache.get(result);
+    } else {
+      let temp = '';
+      for (let i = 0; i < result.length; i += 2) {
+        temp += result[i];
+      }
+      for (let i = 1; i < result.length; i += 2) {
+        temp += result[i];
+      }
+      cache.set(result, temp);
+      result = temp;
+    }
+  }
 
-  //   for (let j = 0; j < charArray.length; j += 1) {
-  //     if (j % 2 === 0) {
-  //       resultArray[evenIndex] = charArray[j];
-  //       evenIndex += 1;
-  //     } else {
-  //       resultArray[oddIndex] = charArray[j];
-  //       oddIndex += 1;
-  //     }
-  //   }
-
-  //   [charArray, resultArray] = [resultArray, charArray];
-  // }
-
-  // return charArray.join('');
-  throw new Error('Not implemented');
+  return result;
 }
 
 /**
@@ -504,25 +527,43 @@ function shuffleChar(/* str, iterations */) {
  * @param {number} number The source number
  * @returns {number} The nearest larger number, or original number if none exists.
  */
-function getNearestBigger(/* number */) {
-  // let temp = number;
-  // const numbers = [];
-  // while (temp !== 0) {
-  //   const num = temp % 10;
-  //   numbers.unshift(num);
-  //   temp = Math.floor(temp / 10);
-  // }
-  // const len = numbers.length - 1;
-  // [numbers[len], numbers[len - 1]] = [numbers[len - 1], numbers[len]];
-  // let string = '';
-  // for (let i = 0; i <= len; i += 1) {
-  //   string += numbers[i];
-  // }
-  // if (+string > number) {
-  //   return +string;
-  // }
-  // return number;
-  throw new Error('Not implemented');
+function getNearestBigger(number) {
+  const arr = Array.from(String(number), Number);
+  let i;
+  for (i = arr.length - 1; i > 0; i -= 1) {
+    if (arr[i] > arr[i - 1]) {
+      break;
+    }
+  }
+
+  if (i === 0) {
+    return number;
+  }
+
+  const x = arr[i - 1];
+  let smallestIndex = i;
+
+  for (let j = i + 1; j < arr.length; j += 1) {
+    if (arr[j] > x && arr[j] < arr[smallestIndex]) {
+      smallestIndex = j;
+    }
+  }
+
+  [arr[i - 1], arr[smallestIndex]] = [arr[smallestIndex], arr[i - 1]];
+
+  const temp = arr.splice(i);
+  const sortedTail = temp.sort((a, b) => a - b);
+
+  for (let k = 0; k < sortedTail.length; k += 1) {
+    arr.push(sortedTail[k]);
+  }
+
+  let result = 0;
+  for (let k = 0; k < arr.length; k += 1) {
+    result = result * 10 + arr[k];
+  }
+
+  return result;
 }
 
 module.exports = {
